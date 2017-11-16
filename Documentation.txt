@@ -1,0 +1,368 @@
+PROJECT DOCUMENT:
+
+ALGORITHEM:
+
+->We created and implemented a find_cvs_file(). The method takes in the name of the directory that we are trying to open. Method will recursively call itself when a subdirectory is found in the directory. 
+->By creating a dynamically allocated array of integer pointers, we use it to store the id of the children process created when fork() is invoked by the parent.
+->Program iterates through the directory through creation of struct dirent passing the name of DIR pointer of the directory name that was sent to the method. 
+->Program will iterate the directory until is reaches the end of the directory, indicated by the NULL termanation
+->Using struct stat we can identify whether an object is a subdirectory or not
+	->if object is a subdirectory 
+		->fork()
+		->child?
+			->recursive call to find_cvs_file() passing the directory path of the subdirectory that we found
+		->parent?
+			->store the process id of the child called, update children count, reallocate if needed
+	->check if object is of a cvs type:
+		->call method check_csv_format() to see if it is  or not a cvs file
+			->True?
+				->fork() and store id 
+				->child? --> id==0
+					->sort(), passing path of cvs file, path of output file, and sort_by header variable
+					->sorting is done using merge_sort 
+				->parent? --> id>0
+					->store the id of the child just created, update number of children, reallocate array if needed
+	->neither a subdirectory not file?
+		->do nothing, continue the loop 
+->No more items items in working directory?
+	-Exit while_loop
+		-create for_loop, and iterate throught the child processes.
+		-make function call to wait(), waiting for any child to end.
+		-loop ends when it reaches the count number of the total number of children, guaranteeing that the parent waits for all it's children processess to end. Even if the child process is a parent to other children processess, the grandparent, will wait until the parent is complete which in turn the parent will end once all of its children are done. 
+
+-free the dynamically allocated array of ints
+
+SUMMARY:
+
+->Over all out program for this part of the project runs on once main method which is the find_cvs_file()
+->The method iterates through a given directory using a while loop looking at each item in the file one by one
+->if the item happens to be a subdirectory is forks and calls the function again
+->sorting is also done forking
+->once there are no more items in directory, the parent waits for all of its children to be done. It known the number of children that it has because everytime is forks the process id of the child is stores and the count of children is stored.
+->Sorting is done using merge_sort which was implemented previously
+
+
+ASSUMPTIONS:
+
+->Only movie.cvs will be used
+->movie.cvs will have the same header as in the previous project 
+->there will be no unreasonable number of subdirectories with multiple cvs files and further more subdirectories. It there are more subdirectories than total number of processes available in the process table then major issues may occur
+
+DESIGN:
+
+A simple method was called in main, method forked when needed to enter subdirectory or sorting of cvs was engaged. The path of the file was generated using stat struct and directory iteration was achived using direc struct, both are provided by C library. Parent stored the ids of all its chidren and waited for all of them to terminate before itself exiting out of the method.
+
+
+DIFFICULTIES:
+
+	Understanding the resources that are shared between the parent and child, when forking
+
+TESTING PROCEEDURE:
+	->Used the intial movie meta_data sorting it by anything other than movie_title, 
+	->Trimed each sorted file in order to create multiple cvs files.
+	->creates a few subdirectories each with multiple or no nested subdirectories
+	->manually counted the number of expected forks 
+	->if program number of forks matches my expected number of forks, then success is assummed
+FUNCTIONS:
+
+	->find_cvs_file():
+		->Method opens the directory which is specified in the arguments passed to this method
+		->an initial dynamically allocated array of integers is created with a limit of 20
+			->is used to store the id of child processes that are made
+		->Using a while loop we create a dirent struct, provided by the C library, to iterate through the direcotry we opened until there are no more files left, termination indicated by a NULL
+		->Using the dir_name() method we create a path name of the location of the item that we encountered in our director, which is used to get info stat using C libray stat and storing into our info variable of type stat.
+		->Using the info variable we are able to check if the current file that we are reading is a subdirectory( S_ISDIR) 
+		->if TRUE:
+			->fork() and store id 
+			->if id is 0 it is child process:
+				->print the id of the child into our hierarchy file 
+				->recursive call to find_cvs_file() with the name of the subdirectory stored in our path varaible
+			->else:
+				->store the id of the child into our array of child_ids
+				->reallocate if needed
+		->else:
+			->check to see if it is a cvs file by making a call to our check_csv_format() by passing the name of of the directory and path
+			->if it is a csv file fork() and store the id of the process
+			->if the id is 0 then it is a child
+				->find the path of the output directory is specified by the user, by making a call to our get_output_name
+					->if DNE then use the initial directory in which the sort.c was called
+				->make a call to our sort_file() method in which the path to the cvs file to sort, the path of the output_file, and the header to sort for as specified by the user
+			->if id is not 0, then it is the parent process:
+				->store the childs id into the array, realloc is necessary
+	-	>if the object in the directory is neither a subdirectory or a cvs the program skips over it. 
+		->upon reaching the end of the directory openned, run a for loop waiting for all the children that were called by the parent process. And print them out.
+->free the dynamically allocated array
+
+	->dir_name():
+		->creates the path of the directory that we are trying to access
+	->check_csv_format():
+		->checks to see if the file that is passes is a cvs file or not by returning a 1 or 0
+	->get_output_name():
+		->creates the name of the output file that will be stored, the name of the file will be the merge of the file name followed by "-" and the type of sort that was done on it. 
+
+
+
+
+
+
+
+
+
+EXTRA CREDIT PART 1: 
+
+
+
+
+
+
+
+EXTRA CREDIT PART 2:
+
+Algorithem to recieve any CSV file and output the sorted items 
+
+-> There will be an integer variable that will keep track of number of tokenize required to get to the sorting column.
+	(i.e) if the parameter is director_name, There will be a loop tokenizing the first line of the file comparing (strcmp) each token to the director 		name. variable "i" will be incremented at each iteration. When the token matches the sorting column, the loop exits out, having variable "i" store the column number. in the movie file, the loop will run twice until the token become director_name and variable i=2.
+
+-> There will be the same arraylist structure as this sorter.c program, but this time ArrayList will be of String type instead of Movie Struct.
+-> ArrayList will store each line (row) one by one until the end of file.
+-> The program will use the same invalid_values() method from sorter.c to saperate the null values/empty_String/data_not_provided, and will print them out first. The Invalid_Values() method will  run a loop 0<i (or 2 in the director_name scenario) to determine the null values
+-> The program will then use the valid_values() method to get the valid_values (values_not_empty_in_the_fields) from the array in the same manner as invalid_value() method.
+
+-> On the arrayList with values method, the mergeSort will be performed. MergeSort will use the compare_content method.
+
+-> compare_content method will use the same functionality as the invalid_values() method to determine which of the two rows should come first or less than another depending on the sorting factor. (running the loop  0 <i.).
+EXTRA CREDIT PART 2 ENDS
+
+Summary:
+-> The program takes a csv file and collects the data. Each row represents a struct. A struct has 28 variables, one for each column of the row.
+-> The program allocates the Movie array of type structs and places each struct (filled with a row) into the index (the row number).
+-> The initial allocation of the Movie Array is 500 (for 500 row), however as the rows reach to the end of the Movie Array, The Movie Array gets reallocated to its double size. (The idea of ArrayList). The program performs final reallocation to erase extra spaces in the movie Array.
+-> Then Program uses two different function(valid_values() and invalid_values) to saperate valid moives and invalid movies and sorts the array that has valid values.
+-> Then the print_movies function is evoked which first prints out the null movies and then sorted movies
+
+null movies == all movies that have an empty fields on sorting factor. i.e. if movie_title is sorting_factor, then all the movies that do not have 			movie_title will be null_values.
+
+Local Variables used: Movie* Array, int total_num_of_movies, int target=500, Movie* array2,null_values=0,non_null_values;
+Global Variables:
+	-> char header[] // to store the first line of stdin. i.e color, director_name ...
+	-> cahr sort_by[]// to store the determinig factor of sorting. i.e. movie_title, imdb_score
+
+
+Assumptions: -> The csv file will have the same format as movie_metadata.csv with the same column headings.
+	     -> Right number of Parameters are provided that is --> ./sorter -c sort_by.
+	     -> Data should not exceed the limit of Systems memory.
+
+
+Design: 
+	->Struct movie for each row
+	->Movie array gets allocated to 100 (target)
+
+	-> Runs a while loop till the stdin provied nothing
+
+	-> inside while loop
+	
+		* reallocates 2*target if the total_num_of_movies is equal to target
+		* Tokenizes each field by using SubTokenize function. (i.e. color, director)
+		* each tokenized field is placed into its associated variable.
+		* then the struct is placed at the appropriate index (total_num_of_movies) of Movie Array 
+		* total_num_of_movies increments in the loop. When the loop ends its value is equal to the number of rows
+
+
+	->Outside while Loop
+
+		* Movie Array gets Reallocated with total_num_of_movies. (freeing extra memory)
+		* Movie array_2 gets allocated with the total_num _of_movies
+		* array_2 is sent in the function called invalid_values(array_2)
+		* if no null values found
+
+			* movie_2 array is freed
+			* Movie_Array is sent in the mergeSort function
+			* Movie_Array is sent to the print_Movies function
+			* returns the main method
+
+
+		* else
+
+
+			* movie_2_array is sent to the printing_movie function
+			* movie_2 array is sent to the valid_values function where all the values are placed into movie_2 array
+			* movie_2 array is sent to the mergesort
+			* movie_2 array is sent to the print_Movies function 
+			* returns the main method
+
+
+
+		* the program ends
+
+
+
+Difficulties:
+
+	->Hard-Coding
+		* Many of the places all 28 variables had to be hard-coded
+
+	->MergeSort
+
+		*  I needed to figure out how to keep arrays pointing to right location when sending them through function
+
+
+Testing Proceedure:
+
+	->Reduction
+
+		* had to reduce movie_metadata file to 5 rows to test if the sorting was working properly
+		* Checked it for each individual variable.
+
+
+
+Functions:
+
+	Subtokenize()
+
+		-> takes a 2 string and the starting index
+		-> runs while loop on the first string
+		-> if the starting index does not start with quotation marks, the loop runs until it starting index hits comma,,copyting the 			values of starting index to end index  into the second string.
+		-> If the starting index does start with quotation marks then the loop runs until the starting index hits another quotation 			marks,copyting the values between the quotation marks into the second string.
+		->returns the ending index;
+
+	compare_movies()
+
+		->takes two parameters of movie type
+		->global variable named "sort_by" has a value of determining factor of sorting
+		->has a set of if/else statements,matches the sort_by, and then compares both of movies' varibale depending on the value of 			sort_by and return the value that indicates which movie should come first
+
+
+	printMovies()
+
+		-> takes two parameters of type Movie array and total_num_of_movies
+		-> Prints the header varibale
+		-> runs the loop total_num_of_movies times printing values of movie array at each index.
+		-> returns void
+
+
+	invalid_values()
+
+		-> takes four parameters. two of Movie Array type and two integers
+		-> runs the loop on the Movie Array that has all the movies(rows) and determines if each row should be a null value
+		-> if yes
+			* the movie is places into the second array 
+		->else 
+			*loop contniues
+		-> returns integer value that indicates the number of null values.
+
+
+	valid_values()
+
+		-> takes four parameters. two of Movie Array type and two integers
+		-> runs the loop on the Movie Array that has all the movies(rows) and determines if each row should be a null value
+		-> if no
+			* the movie is places into the second array 
+		->else 
+			*loop contniues
+		-> returns the function.
+
+
+	trim()
+
+		-> takes a string as a parameter
+		-> trims any leading or trailing white spaces.
+
+
+	MergeSort()
+
+		-> takes two parameter , Movie and the size
+		-> if size is 1 or less the function returns 
+		->else :
+
+			* makes a left array/s
+			* calls the copy function
+
+			* makes a right array of size/s
+			* calls the copy function
+
+
+		-> then calls sort function on left and right .
+
+
+	Copy()
+
+		->takes four  parameters two of type Movie, two of type integer (start and end)
+		-> runs (start-end) times, copying the value of the first arrays at indexes between start and end to second array
+		->returns;
+
+
+
+	Sort()
+
+		-> takes four parameters 3 of type Movie, and the size
+		-> Merges first and second array in appropriate order and puts the values into the third array
+		->returns.
+
+
+	MAN INSTRUCTIONS
+
+		cat INPUT_FILE.CSV|sorter.c - TAKES 2 ARGUMENT AND READS INPUT FROM STDIN (-C, SORT_BY)
+
+
+
+		SORT_BY - String from any of the columns from first row	
+
+		INPUT_FILE - has to be  a csv format file that should be sent to Program through STDIN
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*****************
+EXTRA CREDIT 2:
+****************/
+
+-> At the execution of the program (sorter.c), A file named Heiarchy is generated.
+-> Inside the file:: There is TRIE structure (NESTED STRUCTURE) of all the process that were forked during the execution of the program.
+
+/*************
+STRUCTURE
+*************/
+
+-> The structre is nested structre. You could say same as programming structre or Trie Structure.
+-> Every child is inside the parent (indented), the number of children will not neccesary be in order, but it is guranteed that it will be inside parent
+->every child has a information of its parent, and its own pid number
+
+-> example: supposer we have:
+1) parent
+2) inside parent: we have 1,2,3,4,5
+3) insdie 4: we have 4_nested_1 and 4_nested_2
+
+output: 
+
+	Parent
+
+		[parent/1 : 1_pid()]
+		[parent/2 : 2_pid()]
+		[parent/3 : 3_pid()]
+		[parent/4 : 4_pid()]
+		[parent/5 : 5_pid()]
+
+			[parent/4/4_nested_1 : 4_nested_1.pid()]
+			[parent/4/4_nested_2 : 4_nested_2.pid()]
+
+
+NOTE:: The children of 4 does not neccasarily follow right under 4 due to the forking, but is is guaranteed that they will always be printed after the siblings of chilrent is printed which is process 5 in this case.
+
+4)the children have their parent name indicating where they are cominig from or who is their parents
+-> ex: [parent/1 : 1_pid()]--> process 1 indicated that he a child of parent (parent/1), and prints out its pid (1_pid()), same as childrent of 4th process: [parent/4/4_nested_1 : 4_nested_1.pid()] --> (parent/4/4_nested_1) indicates the parent is the 4th process, and prints out its pid.
+

@@ -1,0 +1,6 @@
+I am a child: my pid is: 29982+ 5
+I am a second Child my pid is: 29982 +5
+I am a second Child my pid is: 29983 +5
+I am parent waiting on both of my child to finish:my chilren are finished
+my pid is: 29981
+second child: 29983
