@@ -9,42 +9,11 @@
 Pary:2
 ->Added reallocation.
 ->Everything tuned
+->Used Recursion for dirs
+->uses lock on the entire method (sort_file())
+->put all the global variables inside the sorter.h file
 
 **********************************************************/
-
-/**global structs**/
-struct names{
-
-    char file[400];
-    char dir[400];
-
-
-
-};
-
-
-/**lock**/
-pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
-
-
-
-
-/****ArrayList for Threads and Struts*****/
-pthread_t * ts;//threads
-struct names * sts; //structs
-int ts_index=0;
-int ts_limit = 1045;
-
-
-
-
-
-/***global ArrayList for movies***/
-Movie* mvs;
-int target=2500;
-int total_num_of_movies=0;
-
-
 
 void* thread_func(void *);
 void* thread_func(void * ptr){
@@ -224,7 +193,7 @@ int main(int argc, char * argv[]){
 	}
 
 
-
+	
 	//printf("let us see this shit: %d\n", total_num_of_movies);
 	int null_values=0, non_null_values=0;
 
@@ -247,6 +216,7 @@ free(invalid_movies);
 
 
 mergeSort(mvs,total_num_of_movies);
+printf("called for null values\n");
 printMovies(mvs,total_num_of_movies, "w","sorted_file.csv");
 
 return 0;
@@ -255,6 +225,7 @@ return 0;
 /**saperate the array**/
 
 //putting the null values first
+//printf("259\n");
 printMovies(invalid_movies,null_values, "w","sorted_file.csv");
 
 //getting the non null values 
@@ -267,6 +238,7 @@ valid_values(mvs, invalid_movies,total_num_of_movies);
 mergeSort(invalid_movies, non_null_values);
 
 //printf("THE OUTPUT FILE NAM EIS: %s\n", output_file_name);
+//printf("272\n");
 printMovies(invalid_movies, non_null_values,"a","sorted_file.csv");
 
 free(invalid_movies);
@@ -518,11 +490,13 @@ int find_csv_files(char *directory_name){
 			
 			/**reallocating the arraylist**/
 			if(ts_index == ts_limit){
-				
+				pthread_mutex_lock(&lock);
+				//printf("lock acquired\n");
 				ts_limit  = ts_limit *2;
 				sts = realloc (sts, sizeof(struct names) * ts_limit);
 				ts  = realloc (ts, sizeof(pthread_t) * ts_limit);
 				//printf("reallocated to : %d\n", ts_limit);
+				pthread_mutex_unlock(&lock);
 				
 			}
 
@@ -1152,7 +1126,7 @@ int compare_movie(Movie movie1,Movie movie2){
 
 
 	printf("Wrong Parameter\n");
-	exit(0);
+	return 0;
 
 	}
 
@@ -1209,6 +1183,7 @@ int subTokenize(char first[],char second[], int index){
 void printMovies(Movie  movies[], int total_movies, char command[],char output_name[]){
 
 	FILE* outputName = fopen(output_name, command);
+	//printf("file name is: %s\ncommad is: %s\n",output_name,command);
 	
 	if (outputName == NULL){
 
@@ -1251,7 +1226,7 @@ movie.actor_2_facebook_likes,movie.imdb_score,movie.aspect_ratio,movie.movie_fac
 
 	}
 
-//fclose(outputName);
+fclose(outputName);
 
 
 }
@@ -1453,7 +1428,7 @@ movie = movies[i];
 
 
 	printf("Wrong Parameter\n");
-	exit(0);
+	return 0;
 
 	}
 	
@@ -1794,6 +1769,7 @@ int sort_file(char input_file_name[],char output_file_name[]){
 	if (file == NULL){
 
 		printf("SORT_FILE...COULD NOT OPEN THE FILE\n",output_file_name);
+		fclose(file);
 		pthread_mutex_unlock(&lock);
 		return -1;
 	}
@@ -2031,55 +2007,9 @@ int sort_file(char input_file_name[],char output_file_name[]){
 
 }    //loop ends
 
-/*printf("number of movies: %d\n", total_num_of_movies);
-return 0 ;*/
-
-//reallocating to the numbers of movies
-//mvs = realloc(mvs, sizeof(Movie)*(total_num_of_movies));
-
-/*
-Movie* invalid_movies;
-invalid_movies = (Movie*)malloc(sizeof(Movie)*total_num_of_movies);
-null_values = invalid_values(mvs, invalid_movies, null_values , total_num_of_movies);
-*/
-//printf("invalid_values: %d\n",null_values);
-/**no need to valid and invalid arrays**/
-/*
-if (null_values <=0){
+fclose(file);
 
 
-
-free(invalid_movies);
-
-
-mergeSort(mvs,total_num_of_movies);
-printMovies(mvs,total_num_of_movies, write,output_file_name);
-
-//printf("no invalid values are found: %s\n", write);
-
-pthread_mutex_unlock(&lock);
-//printf("lock is released\n\n\n");
-return 0;
-}
-*/
-/**saperate the array**/
-
-//putting the null values first
-//printMovies(invalid_movies,null_values, write,output_file_name);
-
-//getting the non null values 
-//non_null_values = (total_num_of_movies) - (null_values);
-
-
-
-//valid_values(mvs, invalid_movies,total_num_of_movies);
-
-//mergeSort(invalid_movies, non_null_values);
-
-//printf("THE OUTPUT FILE NAM EIS: %s\n", output_file_name);
-//printMovies(invalid_movies, non_null_values,append,output_file_name);
-
-//free(invalid_movies);
 
 pthread_mutex_unlock(&lock);
 
