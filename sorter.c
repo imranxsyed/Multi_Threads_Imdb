@@ -12,8 +12,13 @@ Pary:2
 ->Used Recursion for dirs
 ->uses lock on the entire method (sort_file())
 ->put all the global variables inside the sorter.h file
+->Added printing PID and TIDs
+->for each subdirectory . it now makes thread instead of calling the recursive function
+->put the header of get_output_name_function() in the front
+->get the right output file name.
 
 **********************************************************/
+void get_output_name(char[],char[],char[],int );
 
 void* thread_func(void *);
 void* thread_func(void * ptr){
@@ -179,6 +184,8 @@ int main(int argc, char * argv[]){
 
 	/**calling recursive function**/
 	printf("\tExecuting....\n");
+
+	printf("Initial PID: %d\n",getpid());
 	
 	find_csv_files(initial_dir_name);
 
@@ -187,61 +194,68 @@ int main(int argc, char * argv[]){
 
 	for (i=0; i< ts_index; i++){
 
-
+		printf("%d\n", &ts[i]);
 		pthread_join(ts[i], NULL);
 
 	}
 
-
 	
-	//printf("let us see this shit: %d\n", total_num_of_movies);
+
+	char output_file_name[100];
+	get_output_name(output_dir_name,NULL, output_file_name,strcmp("NONE",output_dir_name)==0? 0: 1);
+	//printf("output: %s\n",output_dir_name);
+	
+	
 	int null_values=0, non_null_values=0;
 
-//reallocating to the numbers of movies
-mvs = realloc(mvs, sizeof(Movie)*(total_num_of_movies));
+	//reallocating to the numbers of movies
+	mvs = realloc(mvs, sizeof(Movie)*(total_num_of_movies));
 
 
-Movie* invalid_movies;
-invalid_movies = (Movie*)malloc(sizeof(Movie)*total_num_of_movies);
-null_values = invalid_values(mvs, invalid_movies, null_values , total_num_of_movies);
+	Movie* invalid_movies;
+	invalid_movies = (Movie*)malloc(sizeof(Movie)*total_num_of_movies);
+	null_values = invalid_values(mvs, invalid_movies, null_values , total_num_of_movies);
 
-//printf("invalid_values: %d\n",null_values);
-/**no need to valid and invalid arrays**/
+	//printf("invalid_values: %d\n",null_values);
+	/**no need to valid and invalid arrays**/
 
-if (null_values <=0){
-
-
-
-free(invalid_movies);
-
-
-mergeSort(mvs,total_num_of_movies);
-printf("called for null values\n");
-printMovies(mvs,total_num_of_movies, "w","sorted_file.csv");
-
-return 0;
-}
-
-/**saperate the array**/
-
-//putting the null values first
-//printf("259\n");
-printMovies(invalid_movies,null_values, "w","sorted_file.csv");
-
-//getting the non null values 
-non_null_values = (total_num_of_movies) - (null_values);
+	if (null_values <=0){
 
 
 
-valid_values(mvs, invalid_movies,total_num_of_movies);
+		free(invalid_movies);
 
-mergeSort(invalid_movies, non_null_values);
 
-//printf("THE OUTPUT FILE NAM EIS: %s\n", output_file_name);
-//printf("272\n");
-printMovies(invalid_movies, non_null_values,"a","sorted_file.csv");
+		mergeSort(mvs,total_num_of_movies);
+		printf("called for null values\n");
+		printMovies(mvs,total_num_of_movies, "w",output_file_name);
+		printf("Total number of threads: %d\n", ts_index+1);
 
-free(invalid_movies);
+		return 0;
+	}
+
+	/**saperate the array**/
+
+	//putting the null values first
+	//printf("259\n");
+	printMovies(invalid_movies,null_values, "w",output_file_name);
+
+	//getting the non null values 
+	non_null_values = (total_num_of_movies) - (null_values);
+
+
+
+	valid_values(mvs, invalid_movies,total_num_of_movies);
+
+	mergeSort(invalid_movies, non_null_values);
+
+	//printf("THE OUTPUT FILE NAM EIS: %s\n", output_file_name);
+	//printf("272\n");
+	printMovies(invalid_movies, non_null_values,"a",output_file_name);
+
+	free(invalid_movies);
+
+	printf("Total number of threads: %d\n", ts_index+1);
 
 	
 	
@@ -328,12 +342,12 @@ int check_csv_format(char *name, char path[]){
     ->merge them
     ->ex. file.csv ---> file-movie_title.csv
 **/
-void get_output_name(char[], char[], char[],int );
-void get_output_name(char directory[], char name[],char output[],int check ){
+
+void get_output_name(char directory[],char name[], char output[],int check ){
 
     output[0]= '\0';
     int index=0;
-    int lenght = strlen(name)-4;
+    int lenght = 0;
 
     if (check!=0){
 
@@ -351,16 +365,16 @@ void get_output_name(char directory[], char name[],char output[],int check ){
     **/
 
 
-        int i;
+        /*int i;
         for (i=0; i<lenght; i++){
 
             output[index] = name[i];
             index++;
-        }
+        }*/
 
         output[index]= '\0';
-        strcat(output, "-sorted-");
-        index+=8;
+        strcat(output, "AllFiles-sorted-");
+        index+=16;
         output[index]= '\0';
 
 
@@ -370,7 +384,7 @@ void get_output_name(char directory[], char name[],char output[],int check ){
         **/
         lenght = strlen(temp_sort);
 
-         i;
+         int i;
 
         for (i=0; i<lenght; i++){
 
@@ -380,12 +394,32 @@ void get_output_name(char directory[], char name[],char output[],int check ){
         /**now we have the correct format**/
         output[index] = '\0';
         strcat(output,".csv");
+	//printf("file name is: %s\n", output);
+
 
 }
 
 
 
 
+
+void* thread_dir_func(void *);
+void* thread_dir_func(void * ptr){
+
+
+    struct names * na  = (struct names *) ptr;
+   
+   // printf("file is: %s\n dir is: %s\n sort by is: %s\n",na->file, na->dir, na->sort);
+
+    char input_file[100],output_file[100],sort[50];
+    strcpy(input_file,na->file);
+   
+
+    //printf("%s\n",input_file);
+    find_csv_files(input_file);
+
+    pthread_exit(NULL);
+}
 
 
 
@@ -396,19 +430,6 @@ void get_output_name(char directory[], char name[],char output[],int check ){
 int find_csv_files(char *directory_name){
 
 	
-
-	/*struct names sts_2[1045];
-	pthread_t ts_2[1045];
-	int ts_index_2= 0;*/
-
-	
-
-
-	
-
-
-
-
         /**variable that will serve for a path name**/
         char path[1048];
 
@@ -449,25 +470,43 @@ int find_csv_files(char *directory_name){
                 
             if (S_ISDIR(info.st_mode)){
 
-                
+                    //find_csv_files(path);
+		     struct names st;
 
-		  /**writing in the heiarchy file: extra_credit part:2**/
-		   
-                    find_csv_files(path);
-                    //fork_output.write(getPID())
-                   // printf("SUB_DIR: %s\nThe Path is: %s\n\n", each_dir->d_name,path);
-		    //return 0;
-		
+           		strcpy(st.file, path);
+                       
+			
+			
+			
+			/**reallocating the arraylist**/
+			if(ts_index == ts_limit){
+				
+				pthread_mutex_lock(&lock);				
+				ts_limit  = ts_limit *2;
+				sts = realloc (sts, sizeof(struct names) * ts_limit);
+				ts  = realloc (ts, sizeof(pthread_t) * ts_limit);
+				pthread_mutex_unlock(&lock);	
+				
+				
+			}
+
+			pthread_mutex_lock(&lock);
+			sts[ts_index] = st;
+
+			pthread_create(&ts[ts_index],NULL,thread_dir_func,&sts[ts_index]);
+			
+			ts_index +=1;
+			pthread_mutex_unlock(&lock);
+
 
                
-		
+                    
 
             }
 		else{
 
 
-                //check if the file is .csv file by calling the functin check_csv_format() and check if the contens inside the file is corrent : meaning : MOVIE,DIRECTOR_NAME, ....etc
-
+                
                 if (check_csv_format(each_dir->d_name,path)==0){
 
                   
@@ -477,7 +516,7 @@ int find_csv_files(char *directory_name){
 			/**name of the file to output the sorted results to **/
 			char output_file[500];output_file[0]='\0';
 		
-			get_output_name(output_dir_name, each_dir->d_name, output_file,  strcmp("NONE",output_dir_name)==0? 0: 1);
+			//get_output_name(output_dir_name, each_dir->d_name, output_file,  strcmp("NONE",output_dir_name)==0? 0: 1);
 			
 
 			struct names st;
@@ -500,12 +539,13 @@ int find_csv_files(char *directory_name){
 				
 			}
 
-
+			pthread_mutex_lock(&lock);
 			sts[ts_index] = st;
 
 			pthread_create(&ts[ts_index],NULL,thread_func,&sts[ts_index]);
 			
 			ts_index +=1;
+			pthread_mutex_unlock(&lock);
 
 
 			
