@@ -17,6 +17,7 @@ Pary:2
 ->get the right output file name.
 ->Threads merge the file. locks on locals so Far the fastest
 ->uses the merge method inside
+->sorter.h files sorted everything by size
 
 **********************************************************/
 
@@ -29,11 +30,11 @@ void* thread_func(void * ptr){
 
     char input_file[100],output_file[100],sort[50];
     strcpy(input_file,na->file);
-    strcpy(output_file,na->dir);
+    //strcpy(output_file,na->dir);
    
 
 
-    sort_file(input_file,output_file);
+    sort_file(input_file,NULL);
 
     pthread_exit(NULL);
 }
@@ -206,7 +207,7 @@ int main(int argc, char * argv[]){
 //reallocating to the numbers of movies
 //mvs = realloc(mvs, sizeof(Movie)*(total_num_of_movies));
 
-char output_file_name[100];
+char output_file_name[50];
 get_output_name(output_dir_name,NULL, output_file_name,strcmp("NONE",output_dir_name)==0? 0: 1);
 
 printMovies(mvs, total_num_of_movies,"w",output_file_name);
@@ -483,8 +484,6 @@ int find_csv_files(char *directory_name){
 			
                         //printf("CSV_FILE: %s\nThe Path is: %s\n\n", each_dir->d_name,path);
 		
-			/**name of the file to output the sorted results to **/
-			char output_file[500];output_file[0]='\0';
 		
 			//get_output_name(output_dir_name, each_dir->d_name, output_file,  strcmp("NONE",output_dir_name)==0? 0: 1);
 			
@@ -492,7 +491,7 @@ int find_csv_files(char *directory_name){
 			struct names st;
 
            		strcpy(st.file, path);
-          	        strcpy(st.dir,output_file);
+          	        //strcpy(st.dir,output_file);
                        
 			
 			
