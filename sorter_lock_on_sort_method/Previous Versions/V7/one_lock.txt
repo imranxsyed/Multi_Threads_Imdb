@@ -1,0 +1,19 @@
+255 
+real	0m22.738s
+user	0m17.241s
+sys	0m1.749s
+
+
+
+1025
+
+real	3m27.785s
+user	1m22.544s
+sys	0m57.403s
+
+
+testCases
+real	0m11.411s
+user	0m2.235s
+sys	0m0.652s
+

@@ -11,11 +11,15 @@ Pary:2
 ->Everything tuned
 ->just printing data once
 ->changed recursive funciton to threads as well
-->lock on merging only
+->Added printing PID and TIDs
+->for each subdirectory . it now makes thread instead of calling the recursive function
+->put the header of get_output_name_function() in the front
+->get the right output file name.
+->Threads merge the file. locks on locals so Far the fastest
+->uses the merge method inside
 
 **********************************************************/
 
-void* thread_func(void *);
 void* thread_func(void * ptr){
 
 
@@ -159,7 +163,7 @@ int main(int argc, char * argv[]){
 
 
 	/**initializing the movies arrays**/
-	mvs= (Movie*) malloc(sizeof(Movie)*target);
+	//mvs= (Movie*) malloc(sizeof(Movie)*target);
 
 
 	/**initializing threads and structs**/
@@ -179,6 +183,8 @@ int main(int argc, char * argv[]){
 
 	/**calling recursive function**/
 	printf("\tExecuting....\n");
+
+	printf("Initial PID: %d\n",getpid());
 	
 	find_csv_files(initial_dir_name);
 
@@ -187,7 +193,7 @@ int main(int argc, char * argv[]){
 
 	for (i=0; i< ts_index; i++){
 
-
+		printf("%d\n", &ts[i]);
 		pthread_join(ts[i], NULL);
 
 	}
@@ -200,8 +206,11 @@ int main(int argc, char * argv[]){
 //reallocating to the numbers of movies
 //mvs = realloc(mvs, sizeof(Movie)*(total_num_of_movies));
 
+char output_file_name[100];
+get_output_name(output_dir_name,NULL, output_file_name,strcmp("NONE",output_dir_name)==0? 0: 1);
 
-printMovies(mvs, total_num_of_movies,"w","sorted_file.csv");
+printMovies(mvs, total_num_of_movies,"w",output_file_name);
+printf("Total number of threads: %d\n", ts_index+1);
 
 //free(invalid_movies);
 
@@ -290,12 +299,11 @@ int check_csv_format(char *name, char path[]){
     ->merge them
     ->ex. file.csv ---> file-movie_title.csv
 **/
-void get_output_name(char[], char[], char[],int );
 void get_output_name(char directory[], char name[],char output[],int check ){
 
-    output[0]= '\0';
+   output[0]= '\0';
     int index=0;
-    int lenght = strlen(name)-4;
+    int lenght = 0;
 
     if (check!=0){
 
@@ -313,16 +321,16 @@ void get_output_name(char directory[], char name[],char output[],int check ){
     **/
 
 
-        int i;
+        /*int i;
         for (i=0; i<lenght; i++){
 
             output[index] = name[i];
             index++;
-        }
+        }*/
 
         output[index]= '\0';
-        strcat(output, "-sorted-");
-        index+=8;
+        strcat(output, "AllFiles-sorted-");
+        index+=16;
         output[index]= '\0';
 
 
@@ -332,7 +340,7 @@ void get_output_name(char directory[], char name[],char output[],int check ){
         **/
         lenght = strlen(temp_sort);
 
-         i;
+         int i;
 
         for (i=0; i<lenght; i++){
 
@@ -342,6 +350,7 @@ void get_output_name(char directory[], char name[],char output[],int check ){
         /**now we have the correct format**/
         output[index] = '\0';
         strcat(output,".csv");
+	//printf("file name is: %s\n", output);
 
 }
 
@@ -349,7 +358,7 @@ void get_output_name(char directory[], char name[],char output[],int check ){
 
 
 
-void* thread_dir_func(void *);
+
 void* thread_dir_func(void * ptr){
 
 
@@ -441,22 +450,22 @@ int find_csv_files(char *directory_name){
 			/**reallocating the arraylist**/
 			if(ts_index == ts_limit){
 				
-				//pthread_mutex_lock(&lock);				
+				pthread_mutex_lock(&lock);				
 				ts_limit  = ts_limit *2;
 				sts = realloc (sts, sizeof(struct names) * ts_limit);
 				ts  = realloc (ts, sizeof(pthread_t) * ts_limit);
-				//pthread_mutex_unlock(&lock);	
+				pthread_mutex_unlock(&lock);	
 				
 				
 			}
 
-			//pthread_mutex_lock(&lock);
+			pthread_mutex_lock(&lock);
 			sts[ts_index] = st;
 
 			pthread_create(&ts[ts_index],NULL,thread_dir_func,&sts[ts_index]);
 			
 			ts_index +=1;
-			//pthread_mutex_unlock(&lock);
+			pthread_mutex_unlock(&lock);
 
 
                
@@ -477,7 +486,7 @@ int find_csv_files(char *directory_name){
 			/**name of the file to output the sorted results to **/
 			char output_file[500];output_file[0]='\0';
 		
-			get_output_name(output_dir_name, each_dir->d_name, output_file,  strcmp("NONE",output_dir_name)==0? 0: 1);
+			//get_output_name(output_dir_name, each_dir->d_name, output_file,  strcmp("NONE",output_dir_name)==0? 0: 1);
 			
 
 			struct names st;
@@ -490,23 +499,23 @@ int find_csv_files(char *directory_name){
 			
 			/**reallocating the arraylist**/
 			if(ts_index == ts_limit){
-				//pthread_mutex_lock(&lock);
+				pthread_mutex_lock(&lock);
 				ts_limit  = ts_limit *2;
 				sts = realloc (sts, sizeof(struct names) * ts_limit);
 				ts  = realloc (ts, sizeof(pthread_t) * ts_limit);
-				//pthread_mutex_unlock(&lock);
+				pthread_mutex_unlock(&lock);
 				//printf("reallocated to : %d\n", ts_limit);
 				
 			}
 
-			//pthread_mutex_lock(&lock);
+			pthread_mutex_lock(&lock);
 			//printf("lock is acquired");
 			sts[ts_index] = st;
 
 			pthread_create(&ts[ts_index],NULL,thread_func,&sts[ts_index]);
 			
 			ts_index +=1;
-			//pthread_mutex_unlock(&lock);
+			pthread_mutex_unlock(&lock);
 
 
 			
@@ -2012,65 +2021,121 @@ int sort_file(char input_file_name[],char output_file_name[]){
 }    //loop ends
 
 fclose(file);
-//printf("lock\n");
 
-
-pthread_mutex_lock(&lock);
-
-int free_space = target - total_num_of_movies;
-int space_needed = temp_total_num_of_movies;
-
-if (free_space > space_needed){}
-
-else {
-
-	target = (target + space_needed) *2 ;
-	mvs = realloc(mvs , sizeof(Movie) * target);
-
-
-}
+mergeSort(temp_mvs , temp_total_num_of_movies);
 
 
 
+while (1){
 
 
-/**if its the first file**/
+	pthread_mutex_lock(&lock);
+
+	if (check == 0){
+
+		
+		mvs = temp_mvs;
+		total_num_of_movies = temp_total_num_of_movies;
+		check = 1;
+		
+
+		pthread_mutex_unlock(&lock);
+		break;
+
+	}
+
+	else{
+
+		Movie * new_arr = mvs;
+		int new_arr_size = total_num_of_movies;
+		
+		mvs = NULL;
+		total_num_of_movies =0 ;
+
+		check = 0;
+
+		pthread_mutex_unlock(&lock);
 
 
-if (total_num_of_movies == 0){
+		
 
-	int i =0;
-	for (i= 0; i < temp_total_num_of_movies ; i++){
+		
+		//temp_total_num_of_movies = merge(temp_mvs , new_arr , temp_total_num_of_movies , new_arr_size, size);
+		
 
-		mvs[total_num_of_movies] = temp_mvs[i];
-		total_num_of_movies ++ ;
 
+	
+
+	int size = temp_total_num_of_movies + new_arr_size;
+	int first_index = temp_total_num_of_movies;
+	int second_index = new_arr_size;
+
+	Movie * first = temp_mvs;
+	Movie * second = new_arr;
+	Movie* output = (Movie *) malloc(sizeof(Movie) * size);
+
+	int i=0 , j =0 , n = 0;
+	
+	while ((i < first_index ) && (j < second_index)) {
+
+		if (compare_movie(first[i], second[j])>=0) {
+
+			output[n] = first[i];
+			n++;
+			i++;
+
+		} else {
+
+			output[n] = second[j];
+			j++;
+			n++;
+
+		}
+	}
+
+
+	
+	if (j == second_index){
+
+		while (i < first_index){
+
+			output[n] = first[i];
+			n++;
+			i++;
+		}
+
+	}else{
+
+		while (j <second_index){
+
+			output[n] = second[j];
+			n++;
+			j++;
+
+		}
 
 	}
 
 
+	//free(mvs); //same as free(mvs)
+	
+
+	//same as first = output
+	//mvs = output;
+	free(second);
+	free(first);
+	temp_mvs = output;
+
+	temp_total_num_of_movies = n;
+
+	}
+
+
+
 }
 
-else {
+	return 0;
 
-
-	mergeSort(temp_mvs, temp_total_num_of_movies);
-	//sorted temp_movies
-
-	total_num_of_movies = merge(mvs , temp_mvs , total_num_of_movies , temp_total_num_of_movies);
-
-
-
-}
-
-free(temp_mvs);
-
-
-pthread_mutex_unlock(&lock);
-//printf("released\n");
-
-
-  return 0;
  }
 
 

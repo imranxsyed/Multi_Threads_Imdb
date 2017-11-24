@@ -1,8 +1,8 @@
 
-int merge(Movie[], Movie[], int , int, int );
-int merge(Movie first[], Movie second[], int first_index, int second_index, int size) {
+int merge(Movie[], Movie[], int , int );
+int merge(Movie first[], Movie second[], int first_index, int second_index) {
 
-	Movie* output = (Movie *) malloc(sizeof(Movie) * size);
+	Movie* output = (Movie *) malloc(sizeof(Movie) * target);
 
 	int i=0 , j =0 , n = 0;
 	
@@ -47,14 +47,11 @@ int merge(Movie first[], Movie second[], int first_index, int second_index, int 
 	}
 
 
-	//free(mvs); //same as free(mvs)
+	free(mvs); //same as free(mvs)
 	
 
 	//same as first = output
-	//mvs = output;
-	free(second);
-	free(first);
-	first = output;
+	mvs = output;
 	return n;
 	
 

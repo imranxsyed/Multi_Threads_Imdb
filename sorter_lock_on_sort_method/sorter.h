@@ -11,11 +11,14 @@
 #include<pthread.h>
 
 
-void* thread_dir_func(void *);
-void get_output_name(char[], char[], char[],int );
-void* thread_func(void *);
+
+/**header for recursive method**/
 int find_csv_files(char*);
+
+/**header for checking the method**/
 int check_csv_format(char*, char[]);
+
+/**header and implementation for the dir_name**/
 void dir_name(char* ,char *, char[], int);
 
 
@@ -93,7 +96,6 @@ struct names{
 
 /**lock**/
 pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
-pthread_mutex_t merge_lock = PTHREAD_MUTEX_INITIALIZER;
 
 
 
@@ -102,7 +104,6 @@ pthread_mutex_t merge_lock = PTHREAD_MUTEX_INITIALIZER;
 Movie* mvs;
 int target=2500;
 int total_num_of_movies=0;
-int check = 0;
 
 
 
@@ -111,7 +112,7 @@ int check = 0;
 pthread_t * ts;//threads
 struct names * sts; //structs
 int ts_index=0;
-int ts_limit = 5000;
+int ts_limit = 1045;
 
 
 
