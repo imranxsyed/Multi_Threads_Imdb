@@ -17,6 +17,7 @@ void* thread_func(void *);
 int find_csv_files(char*);
 int check_csv_format(char*, char[]);
 void dir_name(char* ,char *, char[], int);
+int sort_file(char[],char[]);
 
 
 /**File Where all the forking information will written to**/

@@ -28,7 +28,7 @@ void* thread_func(void * ptr){
    
    // printf("file is: %s\n dir is: %s\n sort by is: %s\n",na->file, na->dir, na->sort);
 
-    char input_file[100],output_file[100],sort[50];
+    char input_file[100];
     strcpy(input_file,na->file);
     //strcpy(output_file,na->dir);
    
@@ -216,6 +216,7 @@ printf("Total number of threads: %d\n", ts_index+1);
 //free(invalid_movies);
 
 	
+return 0;
 	
 	
 }	
@@ -259,39 +260,8 @@ int check_csv_format(char *name, char path[]){
          //printf("NON_CSV_FILE: %s\nPath is: %s\n\n",name, path);
         return -1;
     }
-    /** at this time we know we have a file with a csv format
-        -> no we need to check for contents inside**/
-	//char header[1000] = "color,director_name,num_critic_for_reviews,duration,director_facebook_likes,actor_3_facebook_likes,actor_2_name,actor_1_facebook_likes,gross,genres,actor_1_name,movie_title,num_voted_users,cast_total_facebook_likes,actor_3_name,facenumber_in_poster,plot_keywords,movie_imdb_link,num_user_for_reviews,language,country,content_rating,budget,title_year,actor_2_facebook_likes,imdb_score,aspect_ratio,movie_facebook_likes,\n";
-
-
-
-    //openning the file checking its header contents to make sure it is the right format inside csv file
-    /*FILE * file = fopen(path,"r");
-
-    //if could not open the file
-    if (file == NULL){
-
-        printf("Unable to open csv file: %s\n", name);
-        return -1;
-    }
-    fclose(file);
-    return 0;
-*/
-    /**we have the file open now
-        ->get header
-        ->check header
-    
-    char line[1000];
-    fgets(line,1000,file);
-
-    //not the right header
-    if (strcasecmp(line,header)!=0){
-        printf("incorrect header in the csv file: %s\n", name);
-	fclose(file);
-        return -1;
-    }**/
-    
-
+   
+   return 0;
 }
 
 
@@ -367,7 +337,7 @@ void* thread_dir_func(void * ptr){
    
    // printf("file is: %s\n dir is: %s\n sort by is: %s\n",na->file, na->dir, na->sort);
 
-    char input_file[100],output_file[100],sort[50];
+    char input_file[100];
     strcpy(input_file,na->file);
    
 
@@ -1753,8 +1723,7 @@ int sort_file(char input_file_name[],char output_file_name[]){
 
      Movie data;
   
-     char append[2] = "a";
-     char write[2] = "w";
+     
      char token[500]; token[0]= '\0';
      char line[1000]; line[0]= '\0'; 
 
@@ -1781,7 +1750,7 @@ int sort_file(char input_file_name[],char output_file_name[]){
 
 	if (file == NULL){
 
-		printf("SORT_FILE...COULD NOT OPEN THE FILE\n",output_file_name);
+		printf("SORT_FILE...COULD NOT OPEN THE FILE: %s\n",output_file_name);
 		//pthread_mutex_unlock(&lock);
 		return -1;
 	}
