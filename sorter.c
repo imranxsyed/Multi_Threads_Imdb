@@ -18,6 +18,7 @@ Pary:2
 ->Threads merge the file. locks on locals so Far the fastest
 ->uses the merge method inside
 ->sorter.h files sorted everything by size
+-> total_num_of_movies/2 times systems call
 
 **********************************************************/
 
@@ -82,67 +83,177 @@ int main(int argc, char * argv[]){
         exit(0);
 	}
 
-	/**at least the directory is given**/
+	char first_argument = argv[1][1];
+
+	/**all possible paramters**/
 	if (argc>=7){
 
+		
+		
 
 
-        if(strcasecmp(argv[3], "-d") ==0 ){
-
-        strcpy(initial_dir_name, argv[4]);
-        }
-        else{
-
-            printf("WRONG PARAMETERS\n");
-            exit(0);
-        }
+		switch(first_argument){
 
 
+		case 'c' : //printf("C\n");
+			   strcpy(temp_sort,argv[2]);
+			   strcpy(sort_by, argv[2]);
+			   
+			    break;
+		
 
-        if(strcasecmp(argv[5], "-o") ==0 ){
+		case 'd' : //printf("D\n");
+			   strcpy(initial_dir_name, argv[2]);
+			   break;
 
-            strcpy(output_dir_name,argv[6]);
-        }else{
 
-            printf("WRONG PARAMETERS\n");
-            exit(0);
-        }
+		case 'o' : //printf("O\n");
+			   strcpy(output_dir_name,argv[2]);
+			   break;
 
+		default : printf("\tInvalid Paramters\n"); exit(0);
+		
+	}
+
+
+
+
+		
+		first_argument = argv[3][1];
+
+		switch(first_argument){
+
+
+		case 'c' : //printf("C\n");
+			   strcpy(temp_sort,argv[4]);
+			   strcpy(sort_by, argv[4]);
+			   
+			    break;
+		
+
+		case 'd' : //printf("D\n");
+			   strcpy(initial_dir_name, argv[4]);
+			   break;
+
+
+		case 'o' : //printf("O\n");
+			   strcpy(output_dir_name,argv[4]);
+			   break;
+
+		default : printf("\tInvalid Paramters\n"); exit(0);
+
+
+		}
+
+
+	
+		first_argument = argv[5][1];
+
+		switch(first_argument){
+
+
+		case 'c' : //printf("C\n");
+			   strcpy(temp_sort,argv[6]);
+			   strcpy(sort_by, argv[6]);
+			   
+			    break;
+		
+
+		case 'd' : //printf("D\n");
+			   strcpy(initial_dir_name, argv[6]);
+			   break;
+
+
+		case 'o' : //printf("O\n");
+			   strcpy(output_dir_name,argv[6]);
+			   break;
+
+		default : printf("\tInvalid Paramters\n"); exit(0);
+
+
+		}
+		
 
 	}
+
+	/**either input or output directory is given**/
 	else if (argc>=5){
 
+		first_argument = argv[1][1];
+
+		switch(first_argument){
 
 
-        if(strcasecmp(argv[3], "-d") ==0 ){
+			case 'c' : //printf("C\n");
+				   strcpy(temp_sort,argv[2]);
+				   strcpy(sort_by, argv[2]);
+				   
+				    break;
+		
 
-        strcpy(initial_dir_name, argv[4]);
-        strcpy(output_dir_name, "NONE");
-        }
+			case 'd' : //printf("D\n");
+				   strcpy(initial_dir_name, argv[2]);
+				   strcpy(output_dir_name, "NONE");
+				   break;
 
 
+			case 'o' : //printf("O\n");
+				   strcpy(output_dir_name,argv[2]);
+				    getcwd(initial_dir_name,1048);
+				   break;
 
-        else if(strcasecmp(argv[3], "-o") ==0 ){
+			default : printf("\tInvalid Paramters\n"); exit(0);
 
-            strcpy(output_dir_name, argv[4]);
-            getcwd(initial_dir_name,1048);
-        }
+		}
 
-        else{
+		
+	
+		first_argument = argv[3][1];
 
-            printf("WRONG PARAMETERS\n");
-            exit(0);
-        }
+		switch(first_argument){
 
+
+			case 'c' : //printf("C\n");
+				   strcpy(temp_sort,argv[4]);
+				   strcpy(sort_by, argv[4]);
+				   
+				    break;
+		
+
+			case 'd' : //printf("D\n");
+				   strcpy(initial_dir_name, argv[4]);
+				    strcpy(output_dir_name, "NONE");
+				   break;
+
+
+			case 'o' : //printf("O\n");
+				   strcpy(output_dir_name,argv[4]);
+				   getcwd(initial_dir_name,1048);
+				   break;
+
+			default : printf("\tInvalid Paramters\n"); exit(0);
+
+		}
 
 	}
 
+	
 	else{
 
-        getcwd(initial_dir_name,1048);
-        strcpy(output_dir_name, "NONE");
+		strcpy(temp_sort,argv[2]);
+		strcpy(sort_by, argv[2]);
+
+		strcpy(output_dir_name, "NONE");
+		getcwd(initial_dir_name,1048);
 
 	}
+
+
+
+	printf ("initial directoy: %s\nOutput_dir: %s\nsort_by: %s\n",initial_dir_name,output_dir_name,sort_by);
+       
+       
+	//return 0;
 
 
 	/**chekcing if the output dir exists**/
@@ -155,9 +266,7 @@ int main(int argc, char * argv[]){
 	}
 	
 
-	strcpy(temp_sort,argv[2]);
-	strcpy(sort_by, argv[2]);
-
+	
 	strcpy(header, "color,director_name,num_critic_for_reviews,duration,director_facebook_likes,actor_3_facebook_likes,actor_2_name,actor_1_facebook_likes,gross,genres,actor_1_name,movie_title,num_voted_users,cast_total_facebook_likes,actor_3_name,facenumber_in_poster,plot_keywords,movie_imdb_link,num_user_for_reviews,language,country,content_rating,budget,title_year,actor_2_facebook_likes,imdb_score,aspect_ratio,movie_facebook_likes,\n");
 
 
@@ -183,7 +292,7 @@ int main(int argc, char * argv[]){
 	
 
 	/**calling recursive function**/
-	printf("\tExecuting....\n");
+	//printf("\tExecuting....\n");
 
 	printf("Initial PID: %d\n",getpid());
 	
@@ -1178,22 +1287,59 @@ void printMovies(Movie  movies[], int total_movies, char command[],char output_n
 
 	int i= 0 ;
 	Movie movie;
+	Movie movie2;
 
 	for (i=0 ; i< total_movies ; i++){
 
-	movie = movies[i]; // getting the movie at index i
-	//printContent(movie); // printing the content of the movie at index i
-	//printf("line number: %d\n", i);
+	movie = movies[i];
+	
+	i++;
+	
+	if ( i < total_movies){
 
 
-	fprintf(outputName,"%s,%s,%d,%d,%d,%d,%s,%d,%d,%s,%s,%s,%d,%d,%s,%d,%s,%s,%d,%s,%s,%s,%d,%d,%d,%f,%f,%d\n" , movie.color, movie.director_name,movie.num_critic_for_reviews,movie.duration,movie.director_facebook_likes,
+		movie2 = movies[i];
+
+	
+		fprintf(outputName,"%s,%s,%d,%d,%d,%d,%s,%d,%d,%s,%s,%s,%d,%d,%s,%d,%s,%s,%d,%s,%s,%s,%d,%d,%d,%f,%f,%d\n%s,%s,%d,%d,%d,%d,%s,%d,%d,%s,%s,%s,%d,%d,%s,%d,%s,%s,%d,%s,%s,%s,%d,%d,%d,%f,%f,%d\n" , movie.color, movie.director_name,movie.num_critic_for_reviews,movie.duration,movie.director_facebook_likes,
+movie.actor_3_facebook_likes,movie.actor_2_name,movie.actor_1_facebook_likes,movie.gross,movie.genres,
+movie.actor_1_name,movie.movie_title,movie.num_voted_users,movie.cast_total_facebook_likes,movie.actor_3_name,movie.facenumber_in_poster,
+movie.plot_keywords,movie.movie_imdb_link,movie.num_user_for_reviews,movie.language,movie.country,movie.content_rating,movie.budget,
+movie.title_year,
+movie.actor_2_facebook_likes,movie.imdb_score,movie.aspect_ratio,movie.movie_facebook_likes,
+
+movie2.color, movie2.director_name,movie2.num_critic_for_reviews,movie2.duration,movie2.director_facebook_likes,
+movie2.actor_3_facebook_likes,movie2.actor_2_name,movie2.actor_1_facebook_likes,movie2.gross,movie2.genres,
+movie2.actor_1_name,movie2.movie_title,movie2.num_voted_users,movie2.cast_total_facebook_likes,movie2.actor_3_name,movie2.facenumber_in_poster,
+movie2.plot_keywords,movie2.movie_imdb_link,movie2.num_user_for_reviews,movie2.language,movie2.country,movie2.content_rating,movie2.budget,
+movie2.title_year,
+movie2.actor_2_facebook_likes,movie2.imdb_score,movie2.aspect_ratio,movie2.movie_facebook_likes
+);
+
+
+	}else {
+
+		
+		fprintf(outputName,"%s,%s,%d,%d,%d,%d,%s,%d,%d,%s,%s,%s,%d,%d,%s,%d,%s,%s,%d,%s,%s,%s,%d,%d,%d,%f,%f,%d\n" , movie.color, movie.director_name,movie.num_critic_for_reviews,movie.duration,movie.director_facebook_likes,
+movie.actor_3_facebook_likes,movie.actor_2_name,movie.actor_1_facebook_likes,movie.gross,movie.genres,
+movie.actor_1_name,movie.movie_title,movie.num_voted_users,movie.cast_total_facebook_likes,movie.actor_3_name,movie.facenumber_in_poster,
+movie.plot_keywords,movie.movie_imdb_link,movie.num_user_for_reviews,movie.language,movie.country,movie.content_rating,movie.budget,
+movie.title_year,
+movie.actor_2_facebook_likes,movie.imdb_score,movie.aspect_ratio,movie.movie_facebook_likes);
+		
+
+	}
+	
+
+
+	/*fprintf(outputName,"%s,%s,%d,%d,%d,%d,%s,%d,%d,%s,%s,%s,%d,%d,%s,%d,%s,%s,%d,%s,%s,%s,%d,%d,%d,%f,%f,%d\n" , movie.color, movie.director_name,movie.num_critic_for_reviews,movie.duration,movie.director_facebook_likes,
 movie.actor_3_facebook_likes,movie.actor_2_name,movie.actor_1_facebook_likes,movie.gross,movie.genres,
 movie.actor_1_name,movie.movie_title,movie.num_voted_users,movie.cast_total_facebook_likes,movie.actor_3_name,movie.facenumber_in_poster,
 movie.plot_keywords,movie.movie_imdb_link,movie.num_user_for_reviews,movie.language,movie.country,movie.content_rating,movie.budget,
 movie.title_year,
 movie.actor_2_facebook_likes,movie.imdb_score,movie.aspect_ratio,movie.movie_facebook_likes);
 
-
+*/
 	/*printf("%s,%s,%d,%d,%d,%d,%s,%d,%d,%s,%s,%s,%d,%d,%s,%d,%s,%s,%d,%s,%s,%s,%d,%d,%d,%f,%f,%d\n" , movie.color, movie.director_name,movie.num_critic_for_reviews,movie.duration,movie.director_facebook_likes,
 movie.actor_3_facebook_likes,movie.actor_2_name,movie.actor_1_facebook_likes,movie.gross,movie.genres,
 movie.actor_1_name,movie.movie_title,movie.num_voted_users,movie.cast_total_facebook_likes,movie.actor_3_name,movie.facenumber_in_poster,
