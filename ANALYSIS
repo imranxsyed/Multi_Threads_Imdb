@@ -1,0 +1,115 @@
+
+FORKING 						VS 					THREAD
+
+
+											number of files		time
+												1		real	0m0.392s
+														user	0m0.081s
+														sys	0m0.037s
+
+
+												2		real	0m0.220s
+														user	0m0.095s
+														sys	0m0.029s
+
+
+
+												4		real	0m0.822s
+														user	0m0.234s
+														sys	0m0.086s
+
+		
+
+												8		real	0m0.439s
+														user	0m0.621s
+														sys	0m0.192s
+
+
+
+												128		real	0m7.226s
+														user	0m11.753s
+														sys	0m2.298s
+
+
+
+												270		real	0m15.826s
+														user	0m26.508s
+														sys	0m5.185s
+
+
+
+												532          	real	0m25.860s
+														user	0m53.095s
+														sys	0m17.411s
+
+
+
+												1024		real	m57.810s
+														user	1m32.995s
+														sys	1m17.810d
+
+
+number of files 	time								
+
+			real	0m0.104s
+	1		user	0m0.049s
+			sys	0m0.023s
+
+
+
+			real	0m0.358s
+	2		user	0m0.113s
+			sys	0m0.066s
+
+
+
+
+			real	0m0.303s
+	4		user	0m0.240s
+			sys	0m0.103s
+
+
+			real	0m0.466s
+	8		user	0m0.554s
+			sys	0m0.258s
+
+
+
+
+			real	0m3.997s
+			user	0m8.798s
+	128		sys	0m4.341s
+
+
+
+
+
+	270		real	0m8.275s
+			user	0m19.159s
+			sys	0m9.451s
+
+
+
+
+			real	0m14.343s
+	532		user	0m34.961s
+			sys	0m15.511s
+
+
+
+
+			real	0m23.765s
+	1024		user	1m3.454s
+			sys	0m25.322s
+
+
+
+
+
+
+
+
+
+
+
+

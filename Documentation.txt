@@ -1,9 +1,126 @@
 PROJECT DOCUMENT:
 
+
+FORKING 						VS 					THREAD
+
+
+											number of files		time
+												1		real	0m0.392s
+														user	0m0.081s
+														sys	0m0.037s
+
+
+												2		real	0m0.220s
+														user	0m0.095s
+														sys	0m0.029s
+
+
+
+												4		real	0m0.822s
+														user	0m0.234s
+														sys	0m0.086s
+
+		
+
+												8		real	0m0.439s
+														user	0m0.621s
+														sys	0m0.192s
+
+
+
+												128		real	0m7.226s
+														user	0m11.753s
+														sys	0m2.298s
+
+
+
+												270		real	0m15.826s
+														user	0m26.508s
+														sys	0m5.185s
+
+
+
+												532          	real	0m25.860s
+														user	0m53.095s
+														sys	0m17.411s
+
+
+
+												1024		real	m57.810s
+														user	1m32.995s
+														sys	1m17.810d
+
+
+number of files 	time								
+
+			real	0m0.104s
+	1		user	0m0.049s
+			sys	0m0.023s
+
+
+
+			real	0m0.358s
+	2		user	0m0.113s
+			sys	0m0.066s
+
+
+
+
+			real	0m0.303s
+	4		user	0m0.240s
+			sys	0m0.103s
+
+
+			real	0m0.466s
+	8		user	0m0.554s
+			sys	0m0.258s
+
+
+
+
+			real	0m3.997s
+			user	0m8.798s
+	128		sys	0m4.341s
+
+
+
+
+
+	270		real	0m8.275s
+			user	0m19.159s
+			sys	0m9.451s
+
+
+
+
+			real	0m14.343s
+	532		user	0m34.961s
+			sys	0m15.511s
+
+
+
+
+			real	0m23.765s
+	1024		user	1m3.454s
+			sys	0m25.322s
+
+
+
+
+
+
+
+Forking wins!!!
+The reason forking is faster is because it does not have to merge and output the data into the ONE FILE. As soon as fork is finished it just outputs the data into the its designated file where threads merge all the data of the files into one big array and then the main therad outputs the file which takes O(n) time extra
+
+
+
+
+
 EXTRA CREDIT PART 1:
 
-The program uses the queue data structure to exploint the merging of different files at the same time.
-Threads merge into each other and go up the tree.
+The program uses the queue data structure to exploit the merging of different files at the same time.
+Threads merge into each other and go up the tree, and the main thread outputs the file.
 
 
 ALGORITHEM:
@@ -42,8 +159,6 @@ ASSUMPTIONS:
 
 ->Only movie.cvs will be used
 ->movie.cvs will have the same header as in the previous project 
-->there will be no unreasonable number of subdirectories with multiple cvs files and further more subdirectories. It there are more subdirectories than total number of processes available in the process table then major issues may occur
-
 DESIGN:
 
 A simple method was called in main, method threaded when needed to enter subdirectory or sorting of cvs was engaged. The path of the file was generated using stat struct and directory iteration was achived using direc struct, both are provided by C library. Parent stored the ids of all its chidren and waited for all of them to terminate before itself exiting out of the method.
@@ -257,48 +372,4 @@ Functions:
 
 
 
-
-
-
-
-
-
-/*****************
-EXTRA CREDIT 2:
-****************/
-
--> At the execution of the program (sorter.c), A file named Heiarchy is generated.
--> Inside the file:: There is TRIE structure (NESTED STRUCTURE) of all the process that were threaded during the execution of the program.
-
-/*************
-STRUCTURE
-*************/
-
--> The structre is nested structre. You could say same as programming structre or Trie Structure.
--> Every child is inside the parent (indented), the number of children will not neccesary be in order, but it is guranteed that it will be inside parent
-->every child has a information of its parent, and its own pid number
-
--> example: supposer we have:
-1) parent
-2) inside parent: we have 1,2,3,4,5
-3) insdie 4: we have 4_nested_1 and 4_nested_2
-
-output: 
-
-	Parent
-
-		[parent/1 : 1_pid()]
-		[parent/2 : 2_pid()]
-		[parent/3 : 3_pid()]
-		[parent/4 : 4_pid()]
-		[parent/5 : 5_pid()]
-
-			[parent/4/4_nested_1 : 4_nested_1.pid()]
-			[parent/4/4_nested_2 : 4_nested_2.pid()]
-
-
-NOTE:: The children of 4 does not neccasarily follow right under 4 due to the threading, but is is guaranteed that they will always be printed after the siblings of chilrent is printed which is process 5 in this case.
-
-4)the children have their parent name indicating where they are cominig from or who is their parents
--> ex: [parent/1 : 1_pid()]--> process 1 indicated that he a child of parent (parent/1), and prints out its pid (1_pid()), same as childrent of 4th process: [parent/4/4_nested_1 : 4_nested_1.pid()] --> (parent/4/4_nested_1) indicates the parent is the 4th process, and prints out its pid.
 

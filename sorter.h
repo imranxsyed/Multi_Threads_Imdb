@@ -89,6 +89,7 @@ struct movies {
 struct names{
 
     char file[100];
+    int index;
     
 
 

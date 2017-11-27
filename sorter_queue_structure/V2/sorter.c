@@ -32,8 +32,6 @@ void* thread_func(void * ptr){
     char input_file[100];
     strcpy(input_file,na->file);
     //strcpy(output_file,na->dir);
-
-    printf("%d\n", pthread_self());   
    
 
 
@@ -279,8 +277,8 @@ int main(int argc, char * argv[]){
 
 
 	/**initializing threads and structs**/
-	//ts = (pthread_t *)malloc(sizeof(pthread_t)*ts_limit);
-	//sts = (struct names * ) malloc (sizeof(struct names)*ts_limit);
+	ts = (pthread_t *)malloc(sizeof(pthread_t)*ts_limit);
+	sts = (struct names * ) malloc (sizeof(struct names)*ts_limit);
 
 
 	/** call the recursive method
@@ -303,12 +301,12 @@ int main(int argc, char * argv[]){
 	//printf("returnes\n");
 	int i;
 
-	/*for (i=0; i< ts_index; i++){
+	for (i=0; i< ts_index; i++){
 
 		printf("%d\n", &ts[i]);
 		pthread_join(ts[i], NULL);
 
-	}*/
+	}
 
 
 
@@ -450,9 +448,9 @@ void* thread_dir_func(void * ptr){
 
     char input_file[100];
     strcpy(input_file,na->file);
+   
 
-    printf("%d\n", pthread_self());   
-
+//printf("%s\n",input_file);
     find_csv_files(input_file);
 
     pthread_exit(NULL);
@@ -468,11 +466,10 @@ void* thread_dir_func(void * ptr){
 int find_csv_files(char *directory_name){
 
 	
-	int limit_2 = 1500;
-	struct names * sts_2 = malloc(sizeof(struct names) * limit_2);
-	pthread_t* ts_2 = (pthread_t *)malloc(sizeof(pthread_t)*limit_2);
-	int ts_index_2= 0;
-	
+
+	/*struct names sts_2[1045];
+	pthread_t ts_2[1045];
+	int ts_index_2= 0;*/
 
 	
 
@@ -531,25 +528,24 @@ int find_csv_files(char *directory_name){
 			
 			
 			/**reallocating the arraylist**/
-			if(ts_index_2 == limit_2){
+			if(ts_index == ts_limit){
 				
-				//pthread_mutex_lock(&lock);				
-				limit_2  = limit_2 *3;
-				sts_2 = realloc (sts_2, sizeof(struct names) * limit_2);
-				ts_2  = realloc (ts_2, sizeof(pthread_t) * limit_2);
-				//pthread_mutex_unlock(&lock);	
+				pthread_mutex_lock(&lock);				
+				ts_limit  = ts_limit *3;
+				sts = realloc (sts, sizeof(struct names) * ts_limit);
+				ts  = realloc (ts, sizeof(pthread_t) * ts_limit);
+				pthread_mutex_unlock(&lock);	
 				
 				
 			}
 
-			//pthread_mutex_lock(&lock);
-			sts_2[ts_index_2] = st;
+			pthread_mutex_lock(&lock);
+			sts[ts_index] = st;
 
-			pthread_create(&ts_2[ts_index_2],NULL,thread_dir_func,&sts_2[ts_index_2]);
+			pthread_create(&ts[ts_index],NULL,thread_dir_func,&sts[ts_index]);
 			
-			ts_index_2 +=1;
-			ts_index++;
-			//pthread_mutex_unlock(&lock);
+			ts_index +=1;
+			pthread_mutex_unlock(&lock);
 
 
                
@@ -580,25 +576,24 @@ int find_csv_files(char *directory_name){
 			
 			
 			/**reallocating the arraylist**/
-			if(ts_index_2 == limit_2){
-				//pthread_mutex_lock(&lock);
-				limit_2  = limit_2 *3;
-				sts_2 = realloc (sts_2, sizeof(struct names) * limit_2);
-				ts_2  = realloc (ts_2, sizeof(pthread_t) * limit_2);
-				//pthread_mutex_unlock(&lock);
+			if(ts_index == ts_limit){
+				pthread_mutex_lock(&lock);
+				ts_limit  = ts_limit *3;
+				sts = realloc (sts, sizeof(struct names) * ts_limit);
+				ts  = realloc (ts, sizeof(pthread_t) * ts_limit);
+				pthread_mutex_unlock(&lock);
 				//printf("reallocated to : %d\n", ts_limit);
 				
 			}
 
-			//pthread_mutex_lock(&lock);
+			pthread_mutex_lock(&lock);
 			//printf("lock is acquired");
-			sts_2[ts_index_2] = st;
+			sts[ts_index] = st;
 
-			pthread_create(&ts_2[ts_index_2],NULL,thread_func,&sts_2[ts_index_2]);
+			pthread_create(&ts[ts_index],NULL,thread_func,&sts[ts_index]);
 			
-			ts_index_2 +=1;
-			ts_index++;
-			//pthread_mutex_unlock(&lock);
+			ts_index +=1;
+			pthread_mutex_unlock(&lock);
 
 
 			
@@ -615,15 +610,12 @@ int find_csv_files(char *directory_name){
 	}
 
 }
-       		int i;
-		for (i=0; i<ts_index_2 ; i++){
+       		/*int i;
+		for (i=0; i<ts_index_2 ; ts_index_2++){
 
-			//printf("%d\n", &ts_2[i]);
 			pthread_join(ts_2[i],NULL);
 
-		}
-		free(ts_2);
-		free(sts_2);
+		}*/
 		return 1;
 
 
