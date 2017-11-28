@@ -19,6 +19,9 @@ Pary:2
 ->uses the merge method inside
 ->sorter.h files sorted everything by size
 -> total_num_of_movies/2 times systems call
+->Joining threads inside the find_csv_file() method
+->ussing less locks
+->printing the threads ids sequentially
 
 **********************************************************/
 
@@ -33,7 +36,7 @@ void* thread_func(void * ptr){
     strcpy(input_file,na->file);
     //strcpy(output_file,na->dir);
 
-    printf("%d\n", pthread_self());   
+    printf("%d,", pthread_self());   
    
 
 
@@ -297,6 +300,7 @@ int main(int argc, char * argv[]){
 	//printf("\tExecuting....\n");
 
 	printf("Initial PID: %d\n",getpid());
+	printf("TIDS of all child threads: ");
 	
 	find_csv_files(initial_dir_name);
 
@@ -322,7 +326,7 @@ char output_file_name[50];
 get_output_name(output_dir_name,NULL, output_file_name,strcmp("NONE",output_dir_name)==0? 0: 1);
 
 printMovies(mvs, total_num_of_movies,"w",output_file_name);
-printf("Total number of threads: %d\n", ts_index+1);
+printf("\nTotal number of threads: %d\n", ts_index+1);
 
 //free(invalid_movies);
 
@@ -451,7 +455,7 @@ void* thread_dir_func(void * ptr){
     char input_file[100];
     strcpy(input_file,na->file);
 
-    printf("%d\n", pthread_self());   
+    printf("%d,", pthread_self());   
 
     find_csv_files(input_file);
 
@@ -468,7 +472,7 @@ void* thread_dir_func(void * ptr){
 int find_csv_files(char *directory_name){
 
 	
-	int limit_2 = 1500;
+	int limit_2 = 1024;
 	struct names * sts_2 = malloc(sizeof(struct names) * limit_2);
 	pthread_t* ts_2 = (pthread_t *)malloc(sizeof(pthread_t)*limit_2);
 	int ts_index_2= 0;
@@ -523,17 +527,14 @@ int find_csv_files(char *directory_name){
             if (S_ISDIR(info.st_mode)){
 
               
-                    struct names st;
-
-           		strcpy(st.file, path);
-                       
-			
+                   
 			
 			
 			/**reallocating the arraylist**/
 			if(ts_index_2 == limit_2){
 				
-				//pthread_mutex_lock(&lock);				
+				//pthread_mutex_lock(&lock);
+				//printf("allocated in dir\n");				
 				limit_2  = limit_2 *3;
 				sts_2 = realloc (sts_2, sizeof(struct names) * limit_2);
 				ts_2  = realloc (ts_2, sizeof(pthread_t) * limit_2);
@@ -543,6 +544,9 @@ int find_csv_files(char *directory_name){
 			}
 
 			//pthread_mutex_lock(&lock);
+			 struct names st;
+
+           		strcpy(st.file, path);
 			sts_2[ts_index_2] = st;
 
 			pthread_create(&ts_2[ts_index_2],NULL,thread_dir_func,&sts_2[ts_index_2]);
@@ -565,23 +569,12 @@ int find_csv_files(char *directory_name){
 
                   
 			
-                        //printf("CSV_FILE: %s\nThe Path is: %s\n\n", each_dir->d_name,path);
-		
-		
-			//get_output_name(output_dir_name, each_dir->d_name, output_file,  strcmp("NONE",output_dir_name)==0? 0: 1);
-			
-
-			struct names st;
-
-           		strcpy(st.file, path);
-          	        //strcpy(st.dir,output_file);
-                       
-			
-			
+                        
 			
 			/**reallocating the arraylist**/
 			if(ts_index_2 == limit_2){
 				//pthread_mutex_lock(&lock);
+				//printf("allocated for file\n");
 				limit_2  = limit_2 *3;
 				sts_2 = realloc (sts_2, sizeof(struct names) * limit_2);
 				ts_2  = realloc (ts_2, sizeof(pthread_t) * limit_2);
@@ -592,6 +585,8 @@ int find_csv_files(char *directory_name){
 
 			//pthread_mutex_lock(&lock);
 			//printf("lock is acquired");
+			struct names st;
+           		strcpy(st.file, path);
 			sts_2[ts_index_2] = st;
 
 			pthread_create(&ts_2[ts_index_2],NULL,thread_func,&sts_2[ts_index_2]);
