@@ -22,6 +22,7 @@ Pary:2
 ->Joining threads inside the find_csv_file() method
 ->ussing less locks
 ->printing the threads ids sequentially
+->added the correction in paramter checks
 
 **********************************************************/
 
@@ -72,14 +73,10 @@ int main(int argc, char * argv[]){
     
 	/**name for initial director**/
     char initial_dir_name[1048];
+    sort_by[0] = '\0';
 
    
-	/**parameters checking
-		->making sure got the right parameters
-		->initial directoy name
-		->initial_dir = fopen(argv[x], "W")
-	**/
-
+	
 
 	if (argc<3){
 
@@ -243,13 +240,25 @@ int main(int argc, char * argv[]){
 	}
 
 	
-	else{
+	else if (strcmp(argv[1], "-c")==0){
 
 		strcpy(temp_sort,argv[2]);
 		strcpy(sort_by, argv[2]);
 
 		strcpy(output_dir_name, "NONE");
 		getcwd(initial_dir_name,1048);
+
+	}else{
+
+
+		 printf("\tInvalid Paramters\n"); exit(0);
+	
+	}
+
+
+	if (sort_by[0] == '\0'){
+
+		 printf("\tInvalid Paramters\n"); exit(0);
 
 	}
 
